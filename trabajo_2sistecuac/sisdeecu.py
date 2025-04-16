@@ -1,5 +1,5 @@
 import numpy as np
-
+# ---
 def resolver_sistema():
     print(" Sistema de Ecuaciones Lineales con NumPy")
     
