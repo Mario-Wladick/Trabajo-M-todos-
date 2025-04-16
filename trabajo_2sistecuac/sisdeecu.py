@@ -28,5 +28,4 @@ def resolver_sistema():
         print("\n El sistema no tiene solución única:")
         print(str(e))
 
-# Ejecutar el programa
 resolver_sistema()
