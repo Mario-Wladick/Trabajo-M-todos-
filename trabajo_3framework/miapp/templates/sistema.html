@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ecuaciones Lineales</title>
+</head>
+<body>
+    <h1>Sistema de Ecuaciones Lineales con NumPy</h1>
+    
+    <form method="POST" action="/resolver">
+        {% for i in range(n) %}
+            <label for="eq{{ i }}">Coeficientes de la ecuación {{ i+1 }}:</label>
+            <input type="text" name="eq{{ i }}" required>
+            <br>
+        {% endfor %}
+        
+        <label for="b">Términos independientes:</label>
+        <input type="text" name="b" required>
+        <br>
+        
+        <input type="submit" value="Resolver">
+        <input type="hidden" name="n" value="{{ n }}">
+    </form>
+</body>
+</html>
