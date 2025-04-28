@@ -19,14 +19,12 @@ def sistema():
         if n is None:
             return render_template('formulario.html', error="No se recibió el número de incógnitas.")
         
-        # Aquí va la lógica para procesar el formulario
         form_elements = [
             (f"Coeficientes de la ecuación {i+1} (separados por espacio):", f"eq{i}")
             for i in range(n)
         ]
         return render_template('sistema.html', n=n, form_elements=form_elements)
     
-    # Si es un GET (cuando solo se carga la página)
     n = request.args.get('n', type=int)
     if n is None:
         return render_template('formulario.html', error="No se recibió el número de incógnitas.")
