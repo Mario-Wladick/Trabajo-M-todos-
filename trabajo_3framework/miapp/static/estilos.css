@@ -1,0 +1,78 @@
+/* Fondo general y tipografía */
+body {
+    background: #f0f4f8;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Encabezado */
+h1 {
+    text-align: center;
+    color: #1a73e8;
+    margin-top: 30px;
+}
+
+/* Contenedor principal del formulario */
+form {
+    background: #fff;
+    max-width: 500px;
+    margin: 30px auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* Etiquetas */
+label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* Campos de texto y número */
+input[type="text"],
+input[type="number"],
+input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+/* Botón de envío */
+input[type="submit"] {
+    background-color: #1a73e8;
+    color: white;
+    font-weight: bold;
+    border: none;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+input[type="submit"]:hover {
+    background-color: #0c5cc1;
+    cursor: pointer;
+}
+
+/* Mensaje de error */
+p {
+    text-align: center;
+    color: red;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+/* Resultado */
+.resultado {
+    background-color: #e8f0fe;
+    border-left: 6px solid #1a73e8;
+    padding: 10px;
+    margin: 10px auto;
+    max-width: 400px;
+    border-radius: 5px;
+    font-size: 16px;
+}
