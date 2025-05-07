@@ -1,0 +1,185 @@
+\documentclass[a4paper,12pt]{article}
+
+% idioma
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+
+% Margen
+\usepackage{geometry}
+\geometry{top=3cm,bottom=3cm,left=2.5cm,right=2.5cm}
+
+% Paquete para imagenes  graficos
+\usepackage{graphicx}
+
+% Título
+\title{\textbf{Articulo que escogí: "Modelo de Programación Lineal Multiobjetivo para la Logística Inversa en la Industria del Plástico de Polipropileno"}}
+
+\author{
+    Mario Wilfredo Ramirez Puma \\
+    Universidad Nacional del Altiplano Puno \\
+    Escuela Profesional de Ingeniería Estadística e Informática
+}
+\date{\today}
+
+\begin{document}
+
+% Carátula
+\maketitle
+\begin{center}
+    \includegraphics[width=0.5\textwidth]{UNAPuno_logo.jpg}
+    \vspace{1cm}
+    
+    \textbf{Curso: Métodos de Optimización} \\
+    \textbf{DOCENTE: ING: TORRES CRUZ FRED  } \\
+    \vspace{1cm}
+    \textbf{Fecha de entrega: 07 de mayo del 2025}\\
+    Autores del articulo: Efraín De la Hoz(1)*, Jorge Vélez(2) y Ludys López(3)
+\end{center}
+
+\newpage
+
+% Resumen
+\section*{Introducción}
+El trabajo estudiado presenta un modelo de programación lineal multiobjetivo para optimizar la logística inversa en la industria del plástico de polipropileno reciclado (es decir, el proceso de recoger, reciclar y reinsertar materiales en el ciclo productivo).
+
+\newpage
+
+\section*{Idea principal}
+El artículo titulado ``\textit{Modelo de Programación Lineal Multiobjetivo para la Logística Inversa en la Industria del Plástico de Polipropileno}'' trata sobre el desarrollo de un modelo de programación lineal multiobjetivo para optimizar la logística inversa en la industria del plástico de polipropileno reciclado.
+
+cabe resaltar que dicha investigacion esta basado en un análisis cuantitativo y descriptivo.
+
+\subsection*{Objetivos del estudio}
+El objetivo del estudio es diseñar un modelo matemático que permita tomar decisiones óptimas en la logística inversa (es decir, el proceso de recoger, reciclar y reinsertar materiales en el ciclo productivo), teniendo en cuenta múltiples objetivos a la vez, específicamente:
+
+\begin{itemize}
+    \item Minimizar los costos totales del sistema logístico inverso.
+    \item Maximizar la calidad del servicio al cliente.
+    \item Minimizar el impacto ambiental (como la generación de residuos y emisiones).
+\end{itemize}
+
+El modelo propuesto busca determinar, por ejemplo, cuántas toneladas de plástico deben moverse, entre qué centros de acopio o reciclaje, y cómo hacerlo de manera eficiente considerando tanto lo económico como lo ambiental y social.
+
+Se enfoca específicamente en la industria del polipropileno (un tipo de plástico ampliamente utilizado), y considera el contexto de Chile, aunque el modelo puede aplicarse a otros países.
+
+\newpage
+
+% Funciones objetivo
+\section*{Funciones Objetivo}
+
+El modelo propuesto tiene dos funciones objetivo principales:
+
+\subsection*{1. Función Objetivo Z₁: Minimizar Costos Totales}
+La primera función objetivo busca minimizar los costos totales del sistema logístico inverso. La expresión de la función es:
+
+\begin{multline*}
+Z_1 = \sum_{p=1}^{P} \Big[ \sum_{n=1}^{N} \sum_{r=1}^{R} 
+\left( Trans_{rp} \cdot CTrans_{rp} + Alm_{np} \cdot CAlm_R \right) + Pdp \cdot CMP + \\
+HhRp \cdot CHhR + HEp \cdot CHE + Cp \cdot PCp + Dp \cdot PDp + HhOp \cdot CHO + \\
+CInv \cdot Invp + \frac{Invp}{2} + PSp \cdot CPS + PNSp \cdot CPNS + Adtp \cdot CAdt \Big]
+\end{multline*}
+
+
+
+Donde las variables son las siguientes:
+\begin{itemize}
+    \item \( T_{r a n s r p} \): cantidad transportada
+    \item \( C_{T r a n s r p} \): costo de transporte
+    \item \( H_{h R p} \): horas hombre regulares
+    \item \( H_{E p} \): horas extras
+    \item \( C_p, D_p \): contrataciones y despidos
+    \item \( A d t p \): aditivo estabilizante
+\end{itemize}
+La función Z₁ busca encontrar la combinación más económica de decisiones dentro del proceso, ajustando las variables como la cantidad de materiales transportados, el número de horas trabajadas, las contrataciones y despidos, y otros factores operativos.
+
+\subsection*{2. Función Objetivo Z₂: 
+Minimizar Índice de Degradación}
+La segunda función objetivo se enfoca en minimizar el índice de degradación, que está relacionado con la cantidad de aditivo utilizado. La expresión es la siguiente:
+
+\[
+Z_2 = \sum_{p=1}^{P} \left( P D I_0 + m \cdot A d t p \right)
+\]
+
+Donde:
+\begin{itemize}
+    \item \( P D I_0 \): índice de degradación inicial
+    \item \( m \): pendiente obtenida de un modelo de regresión lineal con un \( R^2 \) de 98.48%
+    \item \( A d t p \): cantidad de aditivo estabilizante
+\end{itemize}
+El índice de degradación (Z₂) es importante porque refleja la calidad del material reciclado. Un valor más bajo de este índice indica que el proceso está logrando producir materiales reciclados con una mejor calidad, mientras que un valor más alto puede indicar que el material se degrada, lo que podría afectar su uso posterior.
+
+\newpage
+
+\section*{Planteamiento de las Restricciones}
+
+Una vez definidas las dos funciones objetivo, el modelo se complementa con once restricciones que garantizan la viabilidad y realismo del sistema. De los cuales nosotros trababjaremos con cinco, a mi parecer las más resaltantes sin dejar de lado a las demas que cumplen un papel igual de importante. 
+
+\subsection*{1. Restricciones Seleccionadas del Modelo}
+
+A continuación, mostrare las principales restricciones consideradas en el modelo de programación lineal multiobjetivo. Estas condiciones garantizan que las soluciones obtenidas sean factibles, realistas y acordes con las políticas operativas y técnicas de la empresa recicladora de polipropileno:
+
+\begin{enumerate}
+    \item \textbf{Restricción de Producción (3)}
+    
+    \[
+    (D_{mp} + Inv_p + Inv_{p-1}) \leq Pd_p \leq Cpd_p
+    \]
+    
+    Esta restricción asegura que la producción en el periodo \(p\), representada por \(Pd_p\), sea suficiente para cubrir la demanda total acumulada (es decir, la demanda actual \(D_{mp}\), más el inventario del periodo actual \(Inv_p\) y el inventario del periodo anterior \(Inv_{p-1}\)), sin exceder la capacidad máxima de producción \(Cpd_p\). De esta forma, se evita tanto el desabastecimiento como una sobreproducción ineficiente.
+
+    \item \textbf{Restricción de Mano de Obra Disponible (4)}
+    
+    \[
+    Hh_p \leq Mhh
+    \]
+    
+    Se establece un límite superior a las horas hombre trabajadas en cada periodo. \(Hh_p\) representa el total de horas laborales requeridas, y \(Mhh\) corresponde al máximo permitido según las políticas laborales de la empresa o la legislación vigente. Esta restricción garantiza la operatividad sostenible del proceso productivo.
+
+    \item \textbf{Restricción de Contrataciones y Despidos (5)}
+    
+    \[
+    C_p \leq MC;\quad D_p \leq MD
+    \]
+    
+    Esta doble condición limita las variaciones en la plantilla de personal. \(C_p\) y \(D_p\) son las cantidades de contrataciones y despidos en el periodo \(p\), respectivamente, mientras que \(MC\) y \(MD\) representan los máximos establecidos por la política interna de la empresa. Con ello, se controla la rotación de personal y los costos asociados a la gestión de recursos humanos.
+\newpage    
+    \item \textbf{Restricción sobre el Aditivo Estabilizante (10)}
+    
+    \[
+    0.05\% \leq Adt_p \leq 0.6\%
+    \]
+    
+    Se regula la concentración del aditivo estabilizante \(Adt_p\), un componente químico necesario para garantizar la calidad del polipropileno reciclado. Esta condición asegura que se mantenga dentro de un rango eficiente y seguro, evitando la pérdida de calidad del producto o el uso excesivo de recursos.
+
+    \item \textbf{Restricción de No Negatividad (11)}
+    
+    \[
+    Inv_p, Hh_{Rp}, C_p, D_p, HE_p, HhO_p, PNS_p, PS_p, Adt_p \geq 0
+    \]
+    
+    Todas las variables del modelo deben ser no negativas, ya que representan cantidades físicas como inventario, personal, producción, horas trabajadas o uso de aditivos. Esta condición es esencial para asegurar la coherencia del modelo con la realidad del sistema productivo.
+\end{enumerate}
+\section*{Metodo de solucion y resultados finales:}
+Una vez que se ejecuta el modelo, los resultados pueden ser presentados en forma de:
+\begin{itemize}
+
+\item Valores de las variables: cómo se distribuyen las cantidades de productos, horas de trabajo, contrataciones, despidos, inventarios, etc.
+
+\item Valor de Z₁: el costo total que se logra con la solución.
+
+\item Valor de Z₂: el índice de degradación alcanzado.
+\item Verificación de las restricciones: si todas las restricciones (producción, mano de obra, contrataciones, despidos, aditivos, no negatividad) se cumplen.
+\end{itemize}
+\newpage
+\section *{Conclusión}
+
+El modelo de programación lineal multiobjetivo propuesto permite optimizar dos objetivos importantes en el proceso de reciclaje de polipropileno: la minimización de los costos totales y la reducción del índice de degradación del material reciclado. A través de las funciones objetivo definidas, el modelo busca equilibrar la eficiencia económica del proceso y la calidad del material reciclado,
+Esto gracias a las variables que aportan significativamente a las funciones.
+Las restricciones del modelo aseguran que los recursos disponibles, como la mano de obra, los inventarios y los aditivos, se utilicen de manera eficiente, respetando las políticas de la empresa y las normativas legales. 
+\begin{itemize}
+\item El resultado favorable es aquel donde ambas funciones objetivo (costos y calidad) se minimizan dentro de los límites establecidos por las restricciones.
+
+\item El modelo permite encontrar un equilibrio entre los costos operativos y la calidad del reciclado, proporcionando una solución óptima que satisface las demandas de la empresa
+\end{itemize}
+
+\end{document}
