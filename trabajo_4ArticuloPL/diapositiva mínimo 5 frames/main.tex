@@ -1,0 +1,80 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+
+\title{Modelo de Programación Lineal Multiobjetivo para la Logística Inversa en la Industria del Polipropileno Reciclado}
+\author{Mario Wilfredo Ramírez Puma}
+\institute{Universidad Nacional del Altiplano Puno\\Escuela Profesional de Ingeniería Estadística e Informática}
+\date{Mayo 2025}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Diapositiva 1: Idea principal
+\begin{frame}{Idea principal del artículo}
+\begin{itemize}
+  \item El artículo desarrolla un modelo de Programación Lineal Multiobjetivo (PLM) aplicado a la logística inversa del polipropileno reciclado.
+  \item Busca optimizar simultáneamente:
+  \begin{itemize}
+    \item Los costos totales del sistema.
+    \item La calidad del servicio.
+    \item El impacto ambiental.
+  \end{itemize}
+  \item Se enfoca en decisiones logísticas: transporte, acopio, uso de aditivos y recursos humanos.
+  \item Aplicación contextualizada en la industria chilena del reciclaje, con posibilidad de adaptarse a otros entornos.
+\end{itemize}
+\end{frame}
+
+% Diapositiva 2: Funciones objetivo
+\begin{frame}{Funciones objetivo del modelo}
+\textbf{Función Objetivo 1: Minimizar costos totales}\\
+\small
+$Z_1 = \sum_{p=1}^{P} \left[ \sum_{n=1}^{N} \sum_{r=1}^{R} (Trans_{rp} \cdot CTrans_{rp} + Alm_{np} \cdot CAlm_R) + Pdp \cdot CMP + HhRp \cdot CHhR + HEp \cdot CHE + Cp \cdot PCp + Dp \cdot PDp + HhOp \cdot CHO + CInv \cdot \frac{Invp + Inv_{p-1}}{2} + PSp \cdot CPS + PNSp \cdot CPNS + Adtp \cdot CAdt \right]$\\
+
+\textbf{Función Objetivo 2: Minimizar índice de degradación}\\
+$Z_2 = \sum_{p=1}^{P} (PDI_0 + m \cdot Adtp)$
+\end{frame}
+
+% Diapositiva 3: Restricciones del modelo (1/2)
+\begin{frame}{Restricciones del modelo (I)}
+\begin{itemize}
+  \item \textbf{Producción:} $(Dmp + Invp + Inv_{p-1}) \leq Pdp \leq Cpd$.
+  Esta restricción asegura que la cantidad de producción en cada período sea suficiente para cubrir la demanda (Dmp), considerando el inventario actual y el anterior, pero sin exceder la capacidad máxima de producción de la planta (Cpd).
+  \item \textbf{Mano de obra:} $Hhp \leq Mhh$.
+  Controla que las horas hombre trabajadas en cada periodo no superen el máximo permitido por la empresa, ya sea por políticas internas o por límites físicos del personal.
+  \item \textbf{Contratación/despido:} $Cp \leq MC; \quad Dp \leq MD$.
+  Establece un límite a la cantidad de trabajadores que se pueden contratar (Cp) o despedir (Dp) en cada periodo, para evitar fluctuaciones abruptas en la fuerza laboral.
+  \item \textbf{Horas extras y ociosas:} $HEp \leq X\% \cdot HhRp; \quad HhOp \leq HhRp$.
+  Las horas extras (HEp) no deben superar un porcentaje permitido del total de horas regulares trabajadas (HhRp), y las horas ociosas (HhOp) deben ser menores o iguales a las horas regulares. Esto asegura eficiencia en el uso del recurso humano.
+\end{itemize}
+\end{frame}
+
+% Diapositiva 4: Restricciones del modelo (2/2)
+\begin{frame}{Restricciones del modelo (II)}
+\begin{itemize}
+  \item \textbf{Inventarios:} $Invp \leq MInv$.
+  Limita el nivel máximo de inventario almacenado, considerando ya sea la capacidad física del almacén o políticas de gestión del stock.
+  \item \textbf{Producción no entregada a tiempo:} $PNSp \leq Dmp$.
+  La cantidad de producción no entregada a tiempo (PNSp) no puede ser mayor que la demanda de ese periodo. Esto representa los posibles retrasos o faltantes frente a lo solicitado.
+  \item \textbf{Producción subcontratada:} $PSp \leq CPS$.
+  La cantidad de producción subcontratada (PSp) a empresas externas no debe superar un límite definido (CPS), ya sea por costos, calidad o políticas de la empresa.
+  \item \textbf{Aditivo estabilizante:} $0.05\% \leq Adtp \leq 0.6\%$.
+  Controla la proporción del aditivo estabilizante usado en la producción, para garantizar que la calidad del polipropileno reciclado esté dentro de parámetros técnicos y normativos.
+  \item \textbf{No negatividad:} $Invp, HhRp, Cp, Dp, HEp, HhOp, PNSp, PSp, Adtp \geq 0$.
+
+\end{itemize}
+\end{frame}
+
+% Diapositiva 5: Conclusión
+\begin{frame}{Conclusión}
+\begin{itemize}
+  \item El modelo propuesto permite tomar decisiones óptimas sobre transporte, uso de recursos y calidad del reciclaje.
+  \item Al considerar múltiples objetivos, ofrece soluciones balanceadas entre costo, servicio y sostenibilidad ambiental.
+  \item Constituye un aporte metodológico útil para empresas recicladoras con enfoque en economía circular.
+  \item Las restricciones aseguran viabilidad operativa, legal y técnica en todo el sistema logístico inverso.
+\end{itemize}
+\end{frame}
+
+\end{document}
