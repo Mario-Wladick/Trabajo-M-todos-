@@ -1,0 +1,16 @@
+id_anonimo_emp;Identificador anonimizada de la empresa o unidad economica;Alfanumerico;32;Produce;Anonimizacion compleja
+anio;Ano de origen de la informacion;Numerico;4;SUNAT;Formato:aaaa
+ciiu;Codigo CIIU rev.3 ;Texto;4;Catalogo  INEI;-
+descciiu;Descripcion del Clasificador Internacional  Industrial Uniforme;Texto;150;Catalogo  INEI;-
+sector;Sector economico;Texto;100;Catalogo  INEI;-
+ubigeo;Codigo de ubigeo ;Texto;6;SUNAT;-
+departamento;Departamento donde se encuentra ubicado la empresa;Texto;50;SUNAT;-
+provincia;Provincia donde se encuentra ubicado la empresa;Texto;150;SUNAT;-
+distrito;Distrito donde se encuentra ubicado la empresa;Texto;150;SUNAT;-
+tamanio_emp;Categoria empresarial ( micro, pequena, mediana y gran empresa);Texto;20;Produce;-
+valor_estimado_minimo_venta;Valor estimado minimo de ventas anuales , expresado en soles;Numerico;11;SUNAT;-
+valor_estimado_maximo_venta;Valor estimado maximo de ventas anuales, expresado en soles;Numerico;11;SUNAT;-
+exporta;Indicador de la unidad economica SI/NO exporta;Texto;4;SUNAT;-
+valor_estimado_minimo_fob_dolar;Valor estimado minimo de valor FOB anuales, expresado en dolares americanos;Numerico;10;SUNAT;-
+valor_estimado_maximo_fob_dolar;Valor estimado maximo de valor FOB anual, expresado en dolares americanos;Numerico;10;SUNAT;-
+fec_creacion;Fecha de creacion del dataset;Numerico;8;Produce;Formato: aaaammdd

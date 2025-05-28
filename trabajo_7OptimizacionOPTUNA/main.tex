@@ -1,0 +1,449 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{subcaption}
+\usepackage{multirow}
+\usepackage{array}
+
+% Configuración de página
+\geometry{margin=2.5cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+
+% Configuración de listings para código
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    numbers=left,
+    numberstyle=\tiny,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red},
+}
+
+% Configuración de hyperref
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=blue
+}
+
+\title{\textbf{Métodos de Optimización en Regresión}}
+
+\author{
+Universidad Nacional del Altiplano Puno \\
+Facultad de Ingeniería Estadística e Informática \\
+Presentado por: MARIO WILFREDO RAMIREZ PUMA\\
+Curso: Métodos de Optimización\\
+Docente: Ing. TORRES CRUZ FRED  }
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este trabajo presenta un análisis comparativo de métodos de optimización aplicados a problemas de regresión, utilizando un dataset de empresas agroindustriales de la región Ica, Perú. Se evaluaron tres enfoques: Regresión Lineal Múltiple como baseline, Random Forest estándar, y Random Forest optimizado con Optuna tras aplicar transformación logarítmica. Los resultados demuestran que la transformación de datos y la optimización automática de hiperparámetros son factores críticos para el éxito en datasets con distribuciones extremas. El modelo final logró un coeficiente de determinación ($R^2$) de 0.9987, representando una mejora sustancial respecto a los métodos tradicionales que obtuvieron valores negativos de $R^2$.
+
+\textbf{Palabras clave:} Métodos de optimización, Random Forest, Optuna, transformación logarítmica, regresión, machine learning.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introducción}
+
+Los métodos de optimización constituyen una rama fundamental de las matemáticas aplicadas y la ciencia de datos, con aplicaciones críticas en la resolución de problemas complejos del mundo real. En el contexto de machine learning, la optimización se manifiesta en múltiples niveles: desde la minimización de funciones de pérdida durante el entrenamiento de modelos hasta la búsqueda de hiperparámetros óptimos que maximicen el rendimiento predictivo.
+
+El presente trabajo aborda un problema específico de regresión utilizando datos reales de empresas agroindustriales de la región Ica, Perú. Este dataset presenta características desafiantes típicas de datos empresariales reales: distribuciones extremadamente asimétricas, presencia de outliers significativos, y alta variabilidad en la variable objetivo.
+
+\subsection{Problemática}
+
+Los datos empresariales frecuentemente exhiben distribuciones que violan los supuestos fundamentales de los métodos estadísticos tradicionales. En particular, cuando una pequeña proporción de observaciones domina la variabilidad total del dataset, los algoritmos de regresión convencionales pueden fallar completamente, produciendo modelos con capacidad predictiva nula o negativa.
+
+\subsection{Objetivos}
+
+\textbf{Objetivo General:}
+Evaluar y comparar la efectividad de diferentes métodos de optimización aplicados a un problema de regresión con datos empresariales reales.
+
+\textbf{Objetivos Específicos:}
+\begin{enumerate}
+    \item Analizar las características del dataset y identificar problemas inherentes en los datos.
+    \item Implementar y evaluar métodos de regresión tradicionales como baseline.
+    \item Aplicar técnicas de transformación de datos para abordar problemas de distribución.
+    \item Utilizar algoritmos de ensemble (Random Forest) con optimización automática de hiperparámetros.
+    \item Comparar el rendimiento de diferentes enfoques metodológicos.
+    \item Extraer insights empresariales relevantes del análisis de importancia de variables.
+\end{enumerate}
+
+\section{Marco Teórico}
+
+\subsection{Regresión Lineal Múltiple}
+
+La regresión lineal múltiple constituye el método fundamental para modelar relaciones lineales entre una variable dependiente $y$ y múltiples variables independientes $x_1, x_2, \ldots, x_p$:
+
+\begin{equation}
+y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \cdots + \beta_p x_p + \varepsilon
+\end{equation}
+
+donde $\beta_0, \beta_1, \ldots, \beta_p$ son los coeficientes del modelo y $\varepsilon$ representa el término de error. El método de Mínimos Cuadrados Ordinarios (MCO) estima los parámetros minimizando la suma de cuadrados de los residuos:
+
+\begin{equation}
+\min_{\boldsymbol{\beta}} \sum_{i=1}^{n} (y_i - \boldsymbol{x}_i^T \boldsymbol{\beta})^2
+\end{equation}
+
+\subsection{Random Forest}
+
+Random Forest \cite{breiman2001} es un algoritmo de ensemble que combina múltiples árboles de decisión mediante bootstrap aggregating (bagging). El algoritmo construye $B$ árboles de decisión, cada uno entrenado en una muestra bootstrap del dataset original, y para cada división considera únicamente un subconjunto aleatorio de $m$ variables.
+
+La predicción final se obtiene promediando las predicciones individuales:
+
+\begin{equation}
+\hat{y} = \frac{1}{B} \sum_{b=1}^{B} T_b(\boldsymbol{x})
+\end{equation}
+
+donde $T_b(\boldsymbol{x})$ representa la predicción del $b$-ésimo árbol.
+
+\subsection{Optimización Bayesiana con Optuna}
+
+Optuna \cite{akiba2019} implementa optimización bayesiana utilizando Tree-structured Parzen Estimator (TPE) para la búsqueda eficiente de hiperparámetros. El algoritmo construye modelos probabilísticos de la función objetivo y utiliza estos modelos para sugerir configuraciones prometedoras de hiperparámetros.
+
+\subsection{Transformación Logarítmica}
+
+Para variables con distribuciones altamente asimétricas o con outliers extremos, la transformación logarítmica puede estabilizar la varianza y aproximar la distribución a la normalidad:
+
+\begin{equation}
+y^* = \log(y)
+\end{equation}
+
+Esta transformación es particularmente útil cuando los datos exhiben crecimiento exponencial o cuando la variabilidad es proporcional al nivel de la variable.
+
+\section{Metodología}
+
+\subsection{Descripción del Dataset}
+
+El dataset utilizado contiene información de 494 empresas agroindustriales de la región Ica, Perú, correspondiente al año 2023. Los datos fueron obtenidos del portal de Datos Abiertos del Gobierno Peruano y provienen del Ministerio de la Producción (PRODUCE) en colaboración con SUNAT.
+
+\textbf{Variables del dataset:}
+\begin{itemize}
+    \item \textbf{Variable objetivo:} \texttt{valor\_estimado\_maximo\_venta} (ventas máximas estimadas en soles)
+    \item \textbf{Variables predictoras:}
+    \begin{itemize}
+        \item \texttt{ciiu}: Código de Clasificación Industrial Internacional Uniforme
+        \item \texttt{provincia}: Provincia donde se ubica la empresa
+        \item \texttt{distrito}: Distrito específico de ubicación
+        \item \texttt{descciiu}: Descripción detallada de la actividad económica
+        \item \texttt{tamanio\_emp}: Categoría empresarial (micro, pequeña, mediana, gran empresa)
+        \item \texttt{exporta}: Indicador binario de actividad exportadora
+        \item \texttt{valor\_estimado\_minimo\_venta}: Ventas mínimas estimadas
+    \end{itemize}
+\end{itemize}
+
+\subsection{Análisis Exploratorio}
+
+El análisis exploratorio inicial reveló características problemáticas en la distribución de la variable objetivo:
+
+\begin{table}[H]
+\centering
+\caption{Estadísticas descriptivas de la variable objetivo}
+\begin{tabular}{lr}
+\toprule
+\textbf{Estadística} & \textbf{Valor (S/)} \\
+\midrule
+Media & 29,340,774 \\
+Mediana & 742,500 \\
+Mínimo & 742,500 \\
+Máximo & 13,365,000,000 \\
+Desviación Estándar & 601,274,319 \\
+Coeficiente de Variación & 2,049.3\% \\
+\bottomrule
+\end{tabular}
+\label{tab:estadisticas_descriptivas}
+\end{table}
+
+La distribución mostró una asimetría extrema, con 457 empresas (92.5\%) presentando el mismo valor de ventas máximas (S/ 742,500), mientras que una sola empresa registró ventas de S/ 13,365,000,000, representando un outlier de magnitud 18,000 veces superior al valor modal.
+
+\subsection{Preprocesamiento de Datos}
+
+\textbf{Codificación de Variables Categóricas:}
+Se aplicó Label Encoding a las variables categóricas:
+\begin{itemize}
+    \item \texttt{provincia\_encoded}: 5 categorías únicas
+    \item \texttt{distrito\_encoded}: 34 categorías únicas  
+    \item \texttt{descciiu\_encoded}: 14 categorías únicas
+    \item \texttt{tamanio\_emp\_encoded}: 4 categorías únicas
+\end{itemize}
+
+\textbf{Escalado de Variables (solo Regresión Lineal):}
+Para el modelo de regresión lineal se aplicó StandardScaler para normalizar las variables numéricas, ya que este algoritmo es sensible a la escala de las variables. Random Forest no requiere escalado debido a su naturaleza basada en árboles de decisión.
+
+\textbf{Variable Binaria:}
+La variable \texttt{exporta} se convirtió a formato binario (0/1), donde 22 empresas (4.5\%) reportaron actividad exportadora.
+
+\textbf{División del Dataset:}
+Se aplicó una división aleatoria estratificada 80/20 para entrenamiento y prueba, resultando en 395 muestras para entrenamiento y 99 para evaluación.
+
+\subsection{Modelos Implementados}
+
+\subsubsection{Modelo 1: Regresión Lineal Múltiple (Baseline)}
+
+Se implementó regresión lineal múltiple con standardización de variables mediante StandardScaler. Este modelo sirve como baseline para comparación.
+
+\subsubsection{Modelo 2: Random Forest Estándar}
+
+Se aplicó Random Forest con parámetros por defecto para evaluar el rendimiento sin optimización de hiperparámetros.
+
+\subsubsection{Modelo 3: Random Forest con Transformación Logarítmica y Optuna}
+
+Dado el fracaso de los modelos anteriores, se implementó:
+\begin{enumerate}
+    \item \textbf{Transformación logarítmica} de la variable objetivo
+    \item \textbf{Random Forest} como algoritmo base
+    \item \textbf{Optuna} para optimización automática de hiperparámetros
+\end{enumerate}
+
+\textbf{Hiperparámetros optimizados:}
+\begin{itemize}
+    \item \texttt{n\_estimators}: [50, 300]
+    \item \texttt{max\_depth}: [5, 20]
+    \item \texttt{min\_samples\_split}: [2, 15]
+    \item \texttt{min\_samples\_leaf}: [1, 8]
+    \item \texttt{max\_features}: ['sqrt', 'log2']
+    \item \texttt{bootstrap}: [True, False]
+\end{itemize}
+
+\textbf{Función objetivo:}
+Se minimizó el RMSE mediante validación cruzada 3-fold:
+
+\begin{equation}
+\text{Objetivo} = \frac{1}{K} \sum_{k=1}^{K} \sqrt{\frac{1}{n_k} \sum_{i \in S_k} (y_i - \hat{y}_i)^2}
+\end{equation}
+
+donde $K=3$ es el número de folds y $S_k$ representa el conjunto de prueba en el fold $k$.
+
+\section{Resultados}
+
+\subsection{Comparación de Modelos}
+
+\begin{table}[H]
+\centering
+\caption{Comparación de rendimiento de modelos}
+\begin{tabular}{lrrrl}
+\toprule
+\textbf{Modelo} & \textbf{$R^2$ Train} & \textbf{$R^2$ Test} & \textbf{RMSE Test (S/)} & \textbf{Viable} \\
+\midrule
+Regresión Lineal & 0.8980 & -16,737.21 & 195,455,534 & No \\
+Random Forest Estándar & 0.0632 & -1,605.52 & 60,553,142 & No \\
+RF + Log + Optuna & 0.9763 & 0.9987 & 54,013 & Sí \\
+\bottomrule
+\end{tabular}
+\label{tab:comparacion_modelos}
+\end{table}
+
+\subsection{Impacto de la Transformación Logarítmica}
+
+La transformación logarítmica produjo una mejora dramática en la tratabilidad de los datos:
+
+\begin{table}[H]
+\centering
+\caption{Efecto de la transformación logarítmica}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Métrica} & \textbf{Datos Originales} & \textbf{Datos Log-Transformados} \\
+\midrule
+Coeficiente de Variación & 2,049.3\% & 6.6\% \\
+Rango & S/ 13,364,257,500 & 9.80 \\
+Desviación Estándar & S/ 601,274,319 & 0.91 \\
+\textbf{Mejora en CV} & \textbf{-} & \textbf{310.1x} \\
+\bottomrule
+\end{tabular}
+\label{tab:transformacion_logaritmica}
+\end{table}
+
+\subsection{Optimización con Optuna}
+
+El proceso de optimización exploró 50 configuraciones diferentes de hiperparámetros en aproximadamente 3 minutos. Los hiperparámetros óptimos encontrados fueron:
+
+\begin{table}[H]
+\centering
+\caption{Hiperparámetros óptimos encontrados por Optuna}
+\begin{tabular}{lr}
+\toprule
+\textbf{Hiperparámetro} & \textbf{Valor Óptimo} \\
+\midrule
+\texttt{n\_estimators} & 150 \\
+\texttt{max\_depth} & 16 \\
+\texttt{min\_samples\_split} & 16 \\
+\texttt{min\_samples\_leaf} & 10 \\
+\texttt{max\_features} & sqrt \\
+\texttt{bootstrap} & True \\
+\bottomrule
+\end{tabular}
+\label{tab:hiperparametros_optimos}
+\end{table}
+
+\subsection{Análisis de Importancia de Variables}
+
+El modelo final reveló la importancia relativa de cada variable predictora:
+
+\begin{table}[H]
+\centering
+\caption{Importancia de variables en el modelo final}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Variable} & \textbf{Importancia} & \textbf{Porcentaje} \\
+\midrule
+\texttt{valor\_estimado\_minimo\_venta} & 0.537 & 53.7\% \\
+\texttt{tamanio\_emp\_encoded} & 0.288 & 28.8\% \\
+\texttt{exporta\_encoded} & 0.113 & 11.3\% \\
+\texttt{ciiu} & 0.035 & 3.5\% \\
+\texttt{descciiu\_encoded} & 0.018 & 1.8\% \\
+\texttt{distrito\_encoded} & 0.007 & 0.7\% \\
+\texttt{provincia\_encoded} & 0.002 & 0.2\% \\
+\bottomrule
+\end{tabular}
+\label{tab:importancia_variables}
+\end{table}
+
+\subsection{Métricas de Evaluación Final}
+
+El modelo optimizado final alcanzó las siguientes métricas de rendimiento:
+
+\begin{itemize}
+    \item \textbf{$R^2$ en conjunto de prueba:} 0.9987 (99.87\%)
+    \item \textbf{RMSE en escala original:} S/ 54,013
+    \item \textbf{MAE en escala original:} S/ 20,579
+    \item \textbf{Tiempo de entrenamiento:} ~3 minutos
+\end{itemize}
+
+\section{Discusión}
+
+\subsection{Análisis de Resultados}
+
+Los resultados obtenidos demuestran de manera contundente la importancia crítica del preprocesamiento de datos en problemas de optimización aplicados. La mejora en el coeficiente de determinación desde valores negativos extremos (-16,737) hasta 0.9987 representa un cambio cualitativo fundamental en la viabilidad del modelo.
+
+\textbf{Fracaso de Métodos Tradicionales:}
+La regresión lineal múltiple falló completamente debido a la violación severa de sus supuestos fundamentales. La presencia de un outlier 18,000 veces mayor que el valor modal generó una distribución que no puede ser modelada efectivamente mediante relaciones lineales simples.
+
+\textbf{Limitaciones de Random Forest sin Transformación:}
+Aunque Random Forest es conocido por su robustez ante outliers, incluso este algoritmo falló cuando se enfrentó a la distribución extrema sin preprocesamiento. Esto subraya que ningún algoritmo es completamente inmune a problemas de calidad de datos.
+
+\textbf{Efectividad de la Transformación Logarítmica:}
+La transformación logarítmica redujo el coeficiente de variación de 2,049\% a 6.6\%, una mejora de 310 veces. Esta transformación permitió que los algoritmos de machine learning identificaran patrones genuinos en los datos en lugar de ser dominados por el outlier extremo.
+
+\subsection{Importancia de Variables}
+
+El análisis de importancia de variables revela patrones empresariales coherentes:
+
+\begin{enumerate}
+    \item \textbf{Ventas mínimas como predictor principal (53.7\%):} Este resultado es empresarialmente lógico, ya que existe una correlación natural entre los rangos mínimo y máximo de ventas de una empresa.
+    
+    \item \textbf{Tamaño empresarial (28.8\%):} La categorización oficial del tamaño empresarial captura efectivamente la capacidad operativa y el potencial de ventas.
+    
+    \item \textbf{Actividad exportadora (11.3\%):} Las empresas que exportan tienden a ser más sofisticadas y tener mayores volúmenes de ventas.
+    
+    \item \textbf{Ubicación geográfica (impacto mínimo):} La provincia y distrito tienen impacto negligible, sugiriendo que factores intrínsecos de la empresa son más determinantes que la ubicación.
+\end{enumerate}
+
+
+\section{Conclusiones}
+
+\subsection{Conclusiones Principales}
+
+\begin{enumerate}
+    \item \textbf{La transformación de datos es crítica:} La transformación logarítmica fue el factor determinante para el éxito del proyecto, demostrando que el preprocesamiento adecuado puede resolver problemas aparentemente intratables.
+    
+    \item \textbf{La optimización automática aporta valor significativo:} Optuna identificó una configuración de hiperparámetros que resultó en un modelo prácticamente perfecto (R² = 99.87\%).
+    
+    \item \textbf{Random Forest supera métodos tradicionales en datos complejos:} Cuando se combina con preprocesamiento adecuado, Random Forest demostró capacidades superiores para manejar relaciones no lineales complejas.
+    
+    \item \textbf{Los insights empresariales son consistentes:} Las variables más importantes identificadas por el modelo tienen interpretaciones empresariales claras y lógicas.
+\end{enumerate}
+
+
+\section{Referencias}
+
+\begin{thebibliography}{9}
+
+\bibitem{breiman2001}
+Breiman, L. (2001). Random forests. \textit{Machine learning}, 45(1), 5-32.
+
+\bibitem{akiba2019}
+Akiba, T., Sano, S., Yanase, T., Ohta, T., \& Koyama, M. (2019). Optuna: A next-generation hyperparameter optimization framework. \textit{Proceedings of the 25th ACM SIGKDD international conference on knowledge discovery \& data mining}, 2623-2631.
+
+\bibitem{hastie2009}
+Hastie, T., Tibshirani, R., \& Friedman, J. (2009). \textit{The elements of statistical learning: data mining, inference, and prediction}. Springer Science \& Business Media.
+
+\bibitem{james2013}
+James, G., Witten, D., Hastie, T., \& Tibshirani, R. (2013). \textit{An introduction to statistical learning}. Springer.
+
+\bibitem{pedregosa2011}
+Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., ... \& Duchesnay, E. (2011). Scikit-learn: Machine learning in Python. \textit{The Journal of machine Learning research}, 12, 2825-2830.
+
+\end{thebibliography}
+
+\appendix
+
+\section{Código Principal}
+
+\subsection{Implementación de Random Forest con Optuna}
+
+\begin{lstlisting}[language=Python, caption=Función objetivo para optimización con Optuna]
+def objective_log(trial, X_train, y_train):
+    """Función objetivo optimizada para datos log-transformados"""
+    
+    params = {
+        'n_estimators': trial.suggest_int('n_estimators', 50, 300, step=25),
+        'max_depth': trial.suggest_int('max_depth', 5, 20),
+        'min_samples_split': trial.suggest_int('min_samples_split', 2, 15),
+        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 8),
+        'max_features': trial.suggest_categorical('max_features', 
+                                                 ['sqrt', 'log2']),
+        'bootstrap': trial.suggest_categorical('bootstrap', [True, False]),
+        'random_state': 42
+    }
+    
+    model = RandomForestRegressor(**params)
+    
+    # Cross-validation 3-fold
+    cv_scores = cross_val_score(
+        model, X_train, y_train, 
+        cv=3,
+        scoring='neg_root_mean_squared_error'
+    )
+    
+    return -cv_scores.mean()
+\end{lstlisting}
+
+\subsection{Transformación Logarítmica}
+
+\begin{lstlisting}[language=Python, caption=Aplicación de transformación logarítmica]
+# Aplicar transformación logarítmica
+df['log_ventas_maximas'] = np.log(df['valor_estimado_maximo_venta'])
+
+# Verificar mejora en variabilidad
+cv_original = (original_target.std()/original_target.mean())*100
+cv_log = (log_target.std()/log_target.mean())*100
+mejora = cv_original / cv_log
+
+print(f"CV Original: {cv_original:.1f}%")
+print(f"CV Log: {cv_log:.1f}%") 
+print(f"Mejora: {mejora:.1f}x mejor")
+\end{lstlisting}
+
+\end{document}
