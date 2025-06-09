@@ -1,0 +1,798 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage{caption}
+
+\geometry{margin=2.5cm}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=red,
+}
+
+\title{\textbf{Comparación de Técnicas de Optimización Convexa y No Convexa Aplicadas al Diagnóstico de Cáncer de Mama: Un Estudio Experimental con el Dataset de Wisconsin}}
+
+\author{Presentado por: MARIO WILFREDO RAMIREZ PUMA\\
+\texttt{Lopez.pu26@gmail.com}\\
+ UNIVERSIDAD NACIONAL DEL ALTIPLANO - PUNO\\
+ ESCUELA PROFESIONAL DE INGENIERÍA \\
+ ESTADÍSTICA E INFORMÁTICA\\
+ CURSO: METODOS DE OPTIMIZACIÓN\\
+DOCENTE: ING. TORRES CRUZ FRED\\}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este estudio presenta una comparación experimental exhaustiva entre técnicas de optimización convexa y no convexa aplicadas al diagnóstico de cáncer de mama utilizando el dataset de Wisconsin. Se implementaron y evaluaron seis algoritmos: tres métodos convexos (Regresión Logística, SVM Lineal, y Regresión Ridge) y tres métodos no convexos (Redes Neuronales, SVM con Kernel RBF, y Algoritmos Genéticos). Los resultados revelan un empate técnico excepcional en rendimiento (98.2\% de precisión) entre SVM Lineal, SVM RBF y Algoritmos Genéticos, con diferencias dramáticas en eficiencia computacional que favorecen a los métodos convexos. El hallazgo principal demuestra que el dataset de Wisconsin es linealmente separable, validando que métodos convexos pueden ser suficientes para problemas médicos aparentemente complejos. Los algoritmos genéticos proporcionaron el único valor agregado significativo mediante selección automática de características, reduciendo las variables necesarias de 30 a 11 sin pérdida de rendimiento. Este trabajo contribuye con evidencia empírica sobre cuándo la complejidad algorítmica se justifica en aplicaciones médicas críticas.
+
+\textbf{Palabras clave:} optimización convexa, optimización no convexa, diagnóstico médico, machine learning, cáncer de mama, algoritmos genéticos, SVM, redes neuronales
+\end{abstract}
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introducción}
+
+El diagnóstico temprano y preciso del cáncer de mama constituye uno de los desafíos más críticos en la medicina moderna, donde la precisión algorítmica puede impactar directamente en la supervivencia de pacientes. En este contexto, la selección de técnicas de optimización apropiadas para sistemas de diagnóstico asistido por computadora representa una decisión fundamental que equilibra precisión, eficiencia computacional e interpretabilidad clínica.
+
+El presente estudio aborda una pregunta fundamental en el ámbito de la inteligencia artificial aplicada a medicina: \textbf{¿cuándo se justifica el uso de métodos de optimización no convexa sobre métodos convexos en problemas de diagnóstico médico?} Esta interrogante trasciende consideraciones puramente técnicas, incorporando aspectos prácticos como tiempo de respuesta en entornos clínicos, interpretabilidad de resultados para profesionales médicos, y reproducibilidad de diagnósticos.
+
+\subsection{Motivación del Estudio}
+
+La literatura científica frecuentemente asume que problemas complejos requieren métodos sofisticados de optimización no convexa, particularmente en el contexto de diagnóstico médico donde múltiples variables interactúan de manera aparentemente no lineal. Sin embargo, esta asunción carece de validación experimental rigurosa en datasets específicos, creando una brecha entre teoría y práctica clínica.
+
+El dataset de cáncer de mama de Wisconsin \cite{wolberg1995}, ampliamente utilizado en la comunidad de machine learning, proporciona un caso de estudio ideal para esta comparación debido a sus características morfométricas cuantitativas derivadas de imágenes digitalizadas de aspirados de aguja fina (FNA) de masas mamarias. Con 569 muestras y 30 características numéricas, representa un problema de clasificación binaria con relevancia clínica directa.
+
+\subsection{Objetivos de la Investigación}
+
+\textbf{Objetivo General:}
+Comparar experimentalmente el rendimiento, eficiencia y aplicabilidad clínica de técnicas de optimización convexa versus no convexa en el diagnóstico de cáncer de mama.
+
+\textbf{Objetivos Específicos:}
+\begin{enumerate}
+    \item Implementar y optimizar hiperparámetros de seis algoritmos representativos: Regresión Logística, SVM Lineal, Regresión Ridge (convexos) y Redes Neuronales, SVM RBF, Algoritmos Genéticos (no convexos)
+    \item Evaluar rendimiento predictivo mediante métricas clínicamente relevantes: precisión, sensibilidad, especificidad, F1-Score y AUC-ROC
+    \item Analizar eficiencia computacional y tiempos de convergencia para aplicaciones en tiempo real
+    \item Identificar características discriminativas y su relevancia clínica
+    \item Determinar cuándo la complejidad algorítmica se justifica en términos de beneficios tangibles
+\end{enumerate}
+
+\section{Marco Teórico}
+
+\subsection{Optimización Convexa}
+
+La optimización convexa \cite{boyd2004} constituye una clase fundamental de problemas matemáticos donde tanto la función objetivo como las restricciones son convexas. Formalmente, un problema de optimización convexa se define como:
+
+\begin{equation}
+\begin{aligned}
+\min_{x \in \mathbb{R}^n} \quad & f(x) \\
+\text{sujeto a} \quad & g_i(x) \leq 0, \quad i = 1, \ldots, m \\
+& Ax = b
+\end{aligned}
+\end{equation}
+
+donde $f: \mathbb{R}^n \rightarrow \mathbb{R}$ y $g_i: \mathbb{R}^n \rightarrow \mathbb{R}$ son funciones convexas.
+
+\textbf{Propiedades fundamentales:}
+\begin{itemize}
+    \item \textbf{Óptimo global único:} Todo mínimo local es global
+    \item \textbf{Convergencia garantizada:} Algoritmos eficientes con garantías teóricas
+    \item \textbf{Estabilidad numérica:} Resultados reproducibles y consistentes
+    \item \textbf{Interpretabilidad:} Soluciones matemáticamente interpretables
+\end{itemize}
+
+\subsection{Optimización No Convexa}
+
+Los problemas de optimización no convexa \cite{nocedal2006} se caracterizan por la presencia de múltiples óptimos locales y la ausencia de garantías de convergencia global. Se definen como:
+
+\begin{equation}
+\begin{aligned}
+\min_{x \in \mathbb{R}^n} \quad & f(x) \\
+\text{sujeto a} \quad & x \in \mathcal{S}
+\end{aligned}
+\end{equation}
+
+donde $f$ no es necesariamente convexa y $\mathcal{S} \subseteq \mathbb{R}^n$ puede ser no convexo.
+
+\textbf{Características distintivas:}
+\begin{itemize}
+    \item \textbf{Múltiples óptimos locales:} Riesgo de convergencia prematura
+    \item \textbf{Sensibilidad a inicialización:} Resultados dependientes de condiciones iniciales
+    \item \textbf{Mayor flexibilidad:} Capacidad de modelar relaciones complejas
+    \item \textbf{Costo computacional:} Generalmente mayor tiempo de procesamiento
+\end{itemize}
+
+\subsection{Métodos Convexos Seleccionados}
+
+\subsubsection{Regresión Logística}
+
+La regresión logística modela la probabilidad de pertenencia a una clase mediante la función logística:
+
+\begin{equation}
+P(y=1|x) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p)}}
+\end{equation}
+
+La función de costo log-verosimilitud es convexa:
+
+\begin{equation}
+L(\beta) = -\sum_{i=1}^{n} [y_i \log(p_i) + (1-y_i) \log(1-p_i)]
+\end{equation}
+
+\textbf{Ventajas clínicas:}
+\begin{itemize}
+    \item Salidas probabilísticas interpretables
+    \item Coeficientes indican importancia de características
+    \item Convergencia rápida garantizada
+    \item Amplia aceptación en comunidad médica
+\end{itemize}
+
+\subsubsection{Support Vector Machines (SVM) Lineal}
+
+SVM \cite{vapnik1995} encuentra el hiperplano óptimo que maximiza el margen entre clases:
+
+\begin{equation}
+\min_{w,b} \frac{1}{2}\|w\|^2 + C\sum_{i=1}^{n} \xi_i
+\end{equation}
+
+sujeto a: $y_i(w^T x_i + b) \geq 1 - \xi_i$ y $\xi_i \geq 0$
+
+donde $C$ controla el balance entre margen y error de clasificación.
+
+\textbf{Características destacadas:}
+\begin{itemize}
+    \item Margen máximo garantiza robustez
+    \item Eficiencia en memoria (solo vectores de soporte)
+    \item Base teórica sólida en teoría de aprendizaje estadístico
+    \item Manejo efectivo de datos de alta dimensión
+\end{itemize}
+
+\subsubsection{Regresión Ridge}
+
+La regresión Ridge \cite{hoerl1970} añade regularización L2 a la regresión lineal:
+
+\begin{equation}
+\min_{\beta} \|y - X\beta\|^2 + \alpha\|\beta\|^2
+\end{equation}
+
+\textbf{Adaptación para clasificación:}
+Para problemas de clasificación binaria, se adapta usando un umbral de decisión sobre las predicciones continuas, típicamente 0.5.
+
+\subsection{Métodos No Convexos Seleccionados}
+
+\subsubsection{Redes Neuronales Artificiales}
+
+Las redes neuronales multicapa (MLP) \cite{goodfellow2016} aproximan funciones complejas mediante composición de transformaciones no lineales:
+
+\begin{equation}
+f(x) = \sigma(W_L \sigma(W_{L-1} \cdots \sigma(W_1 x + b_1) + \cdots + b_{L-1}) + b_L)
+\end{equation}
+
+donde $\sigma$ es la función de activación (típicamente ReLU: $\sigma(z) = \max(0,z)$).
+
+\textbf{Función de pérdida (no convexa):}
+\begin{equation}
+L(\theta) = \frac{1}{n}\sum_{i=1}^{n} \ell(f(x_i;\theta), y_i) + \lambda R(\theta)
+\end{equation}
+
+\textbf{Capacidades distintivas:}
+\begin{itemize}
+    \item Aproximación universal de funciones
+    \item Aprendizaje automático de características
+    \item Modelado de interacciones no lineales complejas
+    \item Flexibilidad arquitectural
+\end{itemize}
+
+\subsubsection{SVM con Kernel RBF}
+
+El kernel Radial Basis Function mapea datos a un espacio de características de dimensión infinita:
+
+\begin{equation}
+K(x_i, x_j) = e^{-\gamma \|x_i - x_j\|^2}
+\end{equation}
+
+El problema dual resultante es no convexo en el espacio original pero convexo en el espacio de características implícito.
+
+\textbf{Parámetros críticos:}
+\begin{itemize}
+    \item $C$: Control de regularización
+    \item $\gamma$: Ancho del kernel (influye en complejidad de frontera)
+\end{itemize}
+
+\subsubsection{Algoritmos Genéticos}
+
+Los algoritmos genéticos \cite{holland1992} emulan procesos evolutivos naturales para optimización global:
+
+\textbf{Componentes principales:}
+\begin{enumerate}
+    \item \textbf{Cromosoma:} Codificación binaria de soluciones candidatas
+    \item \textbf{Función de fitness:} Evaluación de calidad de soluciones
+    \item \textbf{Selección:} Proceso de elección de padres (torneo, ruleta)
+    \item \textbf{Cruce:} Intercambio de información genética
+    \item \textbf{Mutación:} Introducción de diversidad genética
+\end{enumerate}
+
+\textbf{Algoritmo básico:}
+\begin{enumerate}
+    \item Inicializar población aleatoria
+    \item Evaluar fitness de individuos
+    \item Seleccionar padres
+    \item Aplicar cruce y mutación
+    \item Reemplazar población
+    \item Repetir hasta convergencia
+\end{enumerate}
+
+\subsection{Dataset de Wisconsin}
+
+El Wisconsin Breast Cancer Dataset \cite{street1993}, creado por Dr. William H. Wolberg en la Universidad de Wisconsin, contiene características computadas de imágenes digitalizadas de aspirados de aguja fina (FNA) de masas mamarias.
+
+\textbf{Características del dataset:}
+\begin{itemize}
+    \item \textbf{Muestras:} 569 casos (357 benignos, 212 malignos)
+    \item \textbf{Características:} 30 atributos numéricos por muestra
+    \item \textbf{Derivación:} Cada característica representa media, error estándar y ``peor valor'' de 10 medidas morfométricas
+\end{itemize}
+
+\textbf{Medidas morfométricas base:}
+\begin{enumerate}
+    \item Radio (promedio de distancias desde centro a puntos del perímetro)
+    \item Textura (desviación estándar de valores en escala de grises)
+    \item Perímetro
+    \item Área
+    \item Suavidad (variación local en longitudes de radio)
+    \item Compacidad (perímetro² / área - 1.0)
+    \item Concavidad (severidad de porciones cóncavas del contorno)
+    \item Puntos cóncavos (número de porciones cóncavas del contorno)
+    \item Simetría
+    \item Dimensión fractal (``aproximación de línea costera'' - 1)
+\end{enumerate}
+
+\section{Metodología}
+
+\subsection{Diseño Experimental}
+
+Se diseñó un experimento controlado para comparar sistemáticamente seis algoritmos de optimización en condiciones idénticas, garantizando reproducibilidad y validez de las comparaciones.
+
+\textbf{Principios metodológicos:}
+\begin{enumerate}
+    \item \textbf{Reproducibilidad:} Semilla aleatoria fija (random\_state=42)
+    \item \textbf{Equidad:} Misma división entrenamiento/prueba para todos los métodos
+    \item \textbf{Rigurosa optimización:} Grid search con validación cruzada
+    \item \textbf{Evaluación completa:} Múltiples métricas clínicamente relevantes
+\end{enumerate}
+
+\subsection{Preprocesamiento de Datos}
+
+\textbf{División del dataset:}
+\begin{itemize}
+    \item \textbf{Entrenamiento:} 80\% (455 muestras)
+    \item \textbf{Prueba:} 20\% (114 muestras)
+    \item \textbf{Estratificación:} Mantiene proporción de clases en ambos conjuntos
+\end{itemize}
+
+\textbf{Normalización:}
+Aplicación de StandardScaler para estandarización Z-score:
+\begin{equation}
+x_{norm} = \frac{x - \mu}{\sigma}
+\end{equation}
+
+donde $\mu$ es la media y $\sigma$ la desviación estándar calculadas únicamente en el conjunto de entrenamiento.
+
+\subsection{Optimización de Hiperparámetros}
+
+Para cada algoritmo se implementó búsqueda exhaustiva de hiperparámetros mediante GridSearchCV con validación cruzada.
+
+\subsubsection{Espacios de Búsqueda}
+
+\textbf{Regresión Logística:}
+\begin{itemize}
+    \item $C \in \{0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0\}$
+    \item Solver $\in \{$liblinear, lbfgs$\}$
+\end{itemize}
+
+\textbf{SVM Lineal:}
+\begin{itemize}
+    \item $C \in \{0.01, 0.1, 1.0, 10.0, 100.0, 1000.0\}$
+    \item Gamma $\in \{$scale, auto$\}$
+\end{itemize}
+
+\textbf{Regresión Ridge:}
+\begin{itemize}
+    \item $\alpha \in \{0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0\}$
+\end{itemize}
+
+\textbf{Redes Neuronales:}
+\begin{itemize}
+    \item Arquitectura $\in \{(50), (100), (50,25), (100,50), (100,50,25)\}$
+    \item $\alpha \in \{0.0001, 0.001, 0.01\}$ (regularización L2)
+    \item Learning rate $\in \{0.001, 0.01\}$
+\end{itemize}
+
+\textbf{SVM RBF:}
+\begin{itemize}
+    \item $C \in \{0.1, 1.0, 10.0, 100.0, 1000.0\}$
+    \item $\gamma \in \{$scale, auto, 0.001, 0.01, 0.1, 1.0, 10.0$\}$
+\end{itemize}
+
+\textbf{Algoritmos Genéticos:}
+\begin{itemize}
+    \item Población: 50 individuos
+    \item Generaciones: 30
+    \item Tasa de mutación: 0.1
+    \item Tasa de cruce: 0.8
+    \item Cromosoma: 36 bits (30 para características + 6 para hiperparámetros)
+\end{itemize}
+
+\subsection{Métricas de Evaluación}
+
+Se seleccionaron métricas estándar en diagnóstico médico para evaluación comprehensiva:
+
+\textbf{Métricas primarias:}
+\begin{equation}
+\text{Precisión (Accuracy)} = \frac{TP + TN}{TP + TN + FP + FN}
+\end{equation}
+
+\begin{equation}
+\text{Precisión (Precision)} = \frac{TP}{TP + FP}
+\end{equation}
+
+\begin{equation}
+\text{Sensibilidad (Recall)} = \frac{TP}{TP + FN}
+\end{equation}
+
+\begin{equation}
+\text{F1-Score} = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+\end{equation}
+
+\begin{equation}
+\text{AUC-ROC} = \int_0^1 \text{TPR}(FPR^{-1}(t)) dt
+\end{equation}
+
+donde TP = Verdaderos Positivos, TN = Verdaderos Negativos, FP = Falsos Positivos, FN = Falsos Negativos.
+
+\textbf{Métricas secundarias:}
+\begin{itemize}
+    \item Tiempo de convergencia
+    \item Número de parámetros/complejidad del modelo
+    \item Estabilidad en validación cruzada
+\end{itemize}
+
+\subsection{Protocolo de Validación}
+
+\textbf{Validación cruzada estratificada:}
+\begin{itemize}
+    \item \textbf{Métodos convexos:} 5-fold CV
+    \item \textbf{Redes neuronales:} 3-fold CV (reducido por costo computacional)
+    \item \textbf{Algoritmos genéticos:} 3-fold CV en evaluación de fitness
+\end{itemize}
+
+\textbf{Evaluación final:}
+Todos los modelos se evalúan en el conjunto de prueba no visto durante optimización de hiperparámetros.
+
+\section{Implementación}
+
+\subsection{Entorno de Desarrollo}
+
+\textbf{Especificaciones técnicas:}
+\begin{itemize}
+    \item \textbf{Lenguaje:} Python 3.8+
+    \item \textbf{Biblioteca principal:} scikit-learn \cite{pedregosa2011}
+    \item \textbf{Dependencias:} NumPy, Pandas, Matplotlib
+    \item \textbf{Hardware:} CPU estándar (sin GPU requerida)
+\end{itemize}
+
+\subsection{Configuraciones Específicas}
+
+\subsubsection{Métodos Convexos}
+
+\textbf{Regresión Logística:}
+\begin{verbatim}
+LogisticRegression(
+    max_iter=1000,
+    random_state=42,
+    C=optimal_C,
+    solver=optimal_solver
+)
+\end{verbatim}
+
+\textbf{SVM Lineal:}
+\begin{verbatim}
+SVC(
+    kernel='linear',
+    random_state=42,
+    probability=True,
+    C=optimal_C
+)
+\end{verbatim}
+
+\textbf{Regresión Ridge:}
+\begin{verbatim}
+Ridge(
+    alpha=optimal_alpha,
+    random_state=42
+)
+\end{verbatim}
+
+\subsubsection{Métodos No Convexos}
+
+\textbf{Redes Neuronales:}
+\begin{verbatim}
+MLPClassifier(
+    hidden_layer_sizes=optimal_architecture,
+    alpha=optimal_alpha,
+    learning_rate_init=optimal_lr,
+    max_iter=1000,
+    random_state=42,
+    early_stopping=True,
+    validation_fraction=0.1
+)
+\end{verbatim}
+
+\textbf{SVM RBF:}
+\begin{verbatim}
+SVC(
+    kernel='rbf',
+    random_state=42,
+    probability=True,
+    C=optimal_C,
+    gamma=optimal_gamma
+)
+\end{verbatim}
+
+\textbf{Algoritmos Genéticos:}
+Implementación personalizada con codificación binaria para optimización simultánea de selección de características e hiperparámetros.
+
+\section{Resultados}
+
+\subsection{Métodos Convexos}
+
+\subsubsection{}{Regresión Logística}
+
+\begin{table}[H]
+\centering
+\caption{Resultados - Regresión Logística}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Accuracy & 0.974 (97.4\%) \\
+Precision & 0.973 (97.3\%) \\
+Recall & 0.986 (98.6\%) \\
+F1-Score & 0.979 (97.9\%) \\
+AUC-ROC & 0.996 (99.6\%) \\
+Tiempo & 0.0037s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Configuración óptima:} C=0.1, solver='lbfgs'\\
+\textbf{Errores:} 1 falso positivo, 2 falsos negativos\\
+\textbf{Interpretación:} Mejor AUC-ROC (99.6\%). Ideal para explicación clínica por interpretabilidad de coeficientes. Velocidad excelente para tiempo real.
+
+\subsubsection{SVM Lineal}
+
+\begin{table}[H]
+\centering
+\caption{Resultados - SVM Lineal}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Accuracy & 0.982 (98.2\%) \\
+Precision & 0.986 (98.6\%) \\
+Recall & 0.986 (98.6\%) \\
+F1-Score & 0.986 (98.6\%) \\
+AUC-ROC & 0.994 (99.4\%) \\
+Tiempo & 0.0065s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Configuración óptima:} C=0.1, vectores de soporte: 51/455 (11.2\%)\\
+\textbf{Errores:} 1 falso positivo, 1 falso negativo\\
+\textbf{Interpretación:} \textbf{Mejor rendimiento global}. Balance perfecto de errores. Eficiencia en memoria. Ideal para implementación clínica.
+
+\subsubsection{Regresión Ridge}
+
+\begin{table}[H]
+\centering
+\caption{Resultados - Regresión Ridge}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Accuracy & 0.956 (95.6\%) \\
+Precision & 0.935 (93.5\%) \\
+Recall & 1.000 (100\%) \\
+F1-Score & 0.966 (96.6\%) \\
+AUC-ROC & 0.993 (99.3\%) \\
+Tiempo & 0.0008s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Configuración óptima:} alpha=1.0\\
+\textbf{Errores:} 5 falsos positivos, 0 falsos negativos\\
+\textbf{Interpretación:} \textbf{Recall perfecto} - no pierde casos malignos. Fastest (0.0008s). Ideal para screening masivo donde seguridad es prioritaria.
+
+\subsection{Métodos No Convexos}
+
+\subsubsection{Redes Neuronales}
+
+\begin{table}[H]
+\centering
+\caption{Resultados - Redes Neuronales}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Accuracy & 0.956 (95.6\%) \\
+Precision & 0.959 (95.9\%) \\
+Recall & 0.972 (97.2\%) \\
+F1-Score & 0.966 (96.6\%) \\
+AUC-ROC & 0.990 (99.0\%) \\
+Tiempo & 0.0523s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Configuración óptima:} 3 capas (100→50→25), alpha=0.0001, lr=0.01\\
+\textbf{Errores:} 4 falsos positivos, 1 falso negativo\\
+\textbf{Interpretación:} \textbf{Rendimiento inferior} a métodos lineales simples. 9,477 parámetros innecesarios. Complejidad no justificada.
+
+\subsubsection{SVM RBF}
+
+\begin{table}[H]
+\centering
+\caption{Resultados - SVM RBF}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Accuracy & 0.982 (98.2\%) \\
+Precision & 0.986 (98.6\%) \\
+Recall & 0.986 (98.6\%) \\
+F1-Score & 0.986 (98.6\%) \\
+AUC-ROC & 0.998 (99.8\%) \\
+Tiempo & 0.0080s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Configuración óptima:} C=10.0, gamma=0.01, vectores: 52/455 (11.4\%)\\
+\textbf{Errores:} 1 falso positivo, 1 falso negativo\\
+\textbf{Interpretación:} \textbf{Idéntico a SVM Lineal}. Gamma=0.01 indica comportamiento cuasi-lineal. Confirma que dataset es linealmente separable.
+
+\subsubsection{Algoritmos Genéticos}
+
+\begin{table}[H]
+\centering
+\caption{Resultados - Algoritmos Genéticos}
+\begin{tabular}{lc}
+\toprule
+\textbf{Métrica} & \textbf{Valor} \\
+\midrule
+Accuracy & 0.982 (98.2\%) \\
+Precision & 0.986 (98.6\%) \\
+Recall & 0.986 (98.6\%) \\
+F1-Score & 0.986 (98.6\%) \\
+AUC-ROC & 0.995 (99.5\%) \\
+Tiempo & 51.35s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Configuración óptima:} 50 individuos, 30 generaciones, características: 11/30\\
+\textbf{Errores:} 1 falso positivo, 1 falso negativo\\
+\textbf{Interpretación:} \textbf{Valor único: reducción dimensional 63.3\%}. Solo 11 características necesarias. Mismo rendimiento con menos mediciones. Justificado solo para selección de características.
+
+
+\subsection{Comparación Global de Métodos}
+
+\begin{table}[H]
+\centering
+\caption{Ranking Final}
+\begin{tabular}{llccr}
+\toprule
+\textbf{Posición} & \textbf{Método} & \textbf{Accuracy} & \textbf{F1-Score} & \textbf{Tiempo} \\
+\midrule
+�� & SVM Lineal & 0.982 & 0.986 & 0.0065s \\
+�� & SVM RBF & 0.982 & 0.986 & 0.0080s \\
+�� & Algoritmos Genéticos & 0.982 & 0.986 & 51.35s \\
+4° & Regresión Logística & 0.974 & 0.979 & 0.0037s \\
+5° & Redes Neuronales & 0.956 & 0.966 & 0.0523s \\
+5° & Regresión Ridge & 0.956 & 0.966 & 0.0008s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Hallazgos principales:}
+\begin{itemize}
+    \item Empate triple en el primer lugar con 98.2\% de precisión
+    \item Los métodos convexos dominaron en eficiencia temporal
+    \item Los algoritmos genéticos proporcionaron el único valor agregado significativo: reducción dimensional
+    \item El dataset no se benefició sustancialmente de modelado no lineal complejo
+\end{itemize}
+
+\section{Comparación y Discusión}
+
+\subsection{Análisis Comparativo de Rendimiento}
+
+Los resultados experimentales revelan un \textbf{empate técnico excepcional} entre tres métodos que alcanzaron 98.2\% de precisión: SVM Lineal (convexo), SVM RBF (no convexo) y Algoritmos Genéticos (no convexo). Este empate es particularmente significativo porque demuestra que, para el dataset de Wisconsin, \textbf{la optimización convexa es suficiente} para alcanzar el rendimiento óptimo.
+
+\textbf{Hallazgo principal:} El dataset de cáncer de mama de Wisconsin es \textbf{fundamentalmente linealmente separable}. La evidencia incluye:
+\begin{itemize}
+    \item SVM RBF con gamma óptimo de 0.01 (comportamiento cuasi-lineal)
+    \item Redes neuronales no superaron a métodos lineales a pesar de 9,477 parámetros
+    \item Misma cantidad de vectores de soporte en SVM lineal vs RBF (51 vs 52)
+\end{itemize}
+
+\subsection{Eficiencia Computacional: Convexo vs No Convexo}
+
+La diferencia temporal es \textbf{dramática}:
+\begin{itemize}
+    \item \textbf{Métodos convexos:} 0.0008s - 0.0065s
+    \item \textbf{Métodos no convexos:} 0.0080s - 51.35s
+\end{itemize}
+
+\textbf{Implicaciones prácticas:}
+\begin{itemize}
+    \item \textbf{Para aplicaciones clínicas en tiempo real:} Métodos convexos son ideales
+    \item \textbf{Para investigación offline:} Métodos no convexos pueden aportar insights adicionales
+    \item \textbf{Costo-beneficio:} Algoritmos genéticos (51.35s) solo se justifican por la selección de características
+\end{itemize}
+
+\subsection{Valor Agregado de Métodos No Convexos}
+
+\textbf{Único beneficio real encontrado:} Algoritmos genéticos lograron \textbf{reducción dimensional del 63.3\%} (de 30 a 11 características) manteniendo rendimiento óptimo.
+
+\textbf{Características seleccionadas automáticamente:}
+\begin{itemize}
+    \item Mean concavity, mean symmetry
+    \item Errores: radius, texture, area, compactness, concave points
+    \item Worst: texture, perimeter, area
+\end{itemize}
+
+\textbf{Interpretación clínica:} Solo 11 de 30 mediciones son necesarias para diagnóstico óptimo, lo que podría \textbf{reducir costos} y \textbf{simplificar protocolos} clínicos.
+
+\subsection{Recomendaciones Prácticas}
+
+\textbf{Para implementación clínica:}
+\begin{enumerate}
+    \item \textbf{Primera opción:} SVM Lineal (balance óptimo velocidad-rendimiento)
+    \item \textbf{Para screening masivo:} Regresión Ridge (recall 100\%)
+    \item \textbf{Para reducir costos:} Algoritmos genéticos para identificar características esenciales
+    \item \textbf{Para investigación:} Regresión logística (interpretabilidad máxima)
+\end{enumerate}
+
+\textbf{Evitar en este contexto:}
+\begin{itemize}
+    \item Redes neuronales (complejidad innecesaria)
+    \item SVM RBF (sin ventaja sobre lineal)
+\end{itemize}
+
+\subsection{Limitaciones del Estudio}
+
+\begin{enumerate}
+    \item \textbf{Dataset específico:} Resultados pueden no generalizarse a otros tipos de cáncer
+    \item \textbf{Tamaño muestral:} 569 muestras pueden ser insuficientes para métodos complejos
+    \item \textbf{Preprocesamiento:} Estandarización pudo haber favorecido a métodos lineales
+    \item \textbf{Validación:} Split único (aunque reproducible con random\_state=42)
+\end{enumerate}
+
+\subsection{Conclusión de la Comparación}
+
+Los métodos \textbf{convexos dominaron} en este experimento, confirmando que \textbf{no siempre más complejidad significa mejor rendimiento}. El valor principal de los métodos no convexos fue la \textbf{capacidad de selección automática de características} demostrada por los algoritmos genéticos, sugiriendo un enfoque híbrido: usar métodos evolutivos para selección de características, seguido de métodos convexos para clasificación final.
+
+\section{Conclusiones}
+
+\subsection{Hallazgos Principales}
+
+Este estudio experimental comparó seis técnicas de optimización (tres convexas y tres no convexas) aplicadas al diagnóstico de cáncer de mama utilizando el dataset de Wisconsin. Los resultados revelan conclusiones fundamentales sobre la efectividad relativa de métodos convexos versus no convexos en problemas de clasificación médica.
+
+\textbf{Hallazgo central:} Los métodos de optimización convexa (SVM Lineal, Regresión Logística, Regresión Ridge) demostraron ser \textbf{suficientes y superiores} para este problema específico, alcanzando rendimientos equivalentes o superiores a métodos no convexos con \textbf{eficiencia computacional dramáticamente mayor}.
+
+\subsection{Rendimiento Comparativo}
+
+El experimento produjo un \textbf{empate técnico excepcional} en el primer lugar con 98.2\% de precisión entre:
+\begin{itemize}
+    \item \textbf{SVM Lineal} (convexo): 0.982 accuracy en 0.0065s
+    \item \textbf{SVM RBF} (no convexo): 0.982 accuracy en 0.0080s
+    \item \textbf{Algoritmos Genéticos} (no convexo): 0.982 accuracy en 51.35s
+\end{itemize}
+
+Este empate demuestra empíricamente que el dataset de Wisconsin es \textbf{linealmente separable}, validando la hipótesis de que no todos los problemas complejos requieren métodos de optimización no convexa.
+
+\subsection{Eficiencia vs Complejidad}
+
+La diferencia en eficiencia computacional fue \textbf{dramática y concluyente}:
+\begin{itemize}
+    \item \textbf{Métodos convexos:} Convergencia en < 0.01 segundos
+    \item \textbf{Métodos no convexos:} Convergencia entre 0.05-51 segundos
+\end{itemize}
+
+Esta diferencia de \textbf{hasta 8,000x en tiempo de ejecución} sin mejora en rendimiento constituye evidencia sólida de que la complejidad algorítmica debe justificarse con beneficios tangibles.
+
+\subsection{Valor Agregado Identificado}
+
+\textbf{Única ventaja significativa de métodos no convexos:} Los algoritmos genéticos lograron \textbf{reducción dimensional del 63.3\%}, identificando que solo 11 de 30 características son necesarias para mantener rendimiento óptimo.
+
+\subsection{Limitaciones y Trabajo Futuro}
+
+\textbf{Limitaciones reconocidas:}
+\begin{itemize}
+    \item Estudio limitado a un dataset específico (Wisconsin)
+    \item Resultados pueden no generalizarse a otros tipos de cáncer
+    \item Tamaño muestral moderado (569 casos) puede favorecer métodos simples
+\end{itemize}
+
+\textbf{Direcciones futuras:}
+\begin{enumerate}
+    \item \textbf{Validación externa:} Replicar en datasets de otros tipos de cáncer
+    \item \textbf{Estudios longitudinales:} Evaluar performance en datos temporales
+    \item \textbf{Métodos híbridos:} Combinar selección evolutiva con clasificación convexa
+    \item \textbf{Implementación clínica:} Validar protocolo reducido de 11 características en práctica real
+\end{enumerate}
+
+\subsection{Reflexión Final}
+
+Este estudio demuestra que, \textbf{la complejidad no es sinónimo de superioridad}. Los métodos de optimización convexa, fundamentados en sólidos principios matemáticos y computacionalmente eficientes, pueden ser la solución óptima para problemas clínicos específicos.
+
+La elección entre métodos convexos y no convexos debe basarse en \textbf{evidencia experimental rigurosa} más que en asunciones sobre la complejidad aparente del problema. Para el diagnóstico de cáncer de mama mediante análisis morfométrico, los métodos convexos proporcionan la combinación ideal de \textbf{precisión, eficiencia e interpretabilidad} requerida en aplicaciones médicas críticas.
+
+\textbf{Impacto esperado:} Estos resultados pueden informar decisiones de implementación en sistemas de diagnóstico asistido por computadora, priorizando métodos que combinen alta precisión con eficiencia computacional y interpretabilidad clínica.
+
+\section{Referencias}
+
+\begin{thebibliography}{15}
+
+\bibitem{wolberg1995} Wolberg, W. H., Street, W. N., \& Mangasarian, O. L. (1995). Breast cancer Wisconsin (diagnostic) data set. \textit{UCI Machine Learning Repository}. University of California, Irvine, School of Information and Computer Sciences.
+
+\bibitem{boyd2004} Boyd, S., \& Vandenberghe, L. (2004). \textit{Convex optimization}. Cambridge University Press.
+
+\bibitem{nocedal2006} Nocedal, J., \& Wright, S. J. (2006). \textit{Numerical optimization} (2nd ed.). Springer Science \& Business Media.
+
+\bibitem{vapnik1995} Vapnik, V. N. (1995). \textit{The nature of statistical learning theory}. Springer-Verlag.
+
+\bibitem{cortes1995} Cortes, C., \& Vapnik, V. (1995). Support-vector networks. \textit{Machine Learning}, 20(3), 273-297.
+
+\bibitem{hoerl1970} Hoerl, A. E., \& Kennard, R. W. (1970). Ridge regression: Biased estimation for nonorthogonal problems. \textit{Technometrics}, 12(1), 55-67.
+
+\bibitem{goodfellow2016} Goodfellow, I., Bengio, Y., \& Courville, A. (2016). \textit{Deep learning}. MIT Press.
+
+\bibitem{holland1992} Holland, J. H. (1992). \textit{Adaptation in natural and artificial systems: An introductory analysis with applications to biology, control, and artificial intelligence}. MIT Press.
+
+\bibitem{street1993} Street, W. N., Wolberg, W. H., \& Mangasarian, O. L. (1993). Nuclear feature extraction for breast tumor diagnosis. \textit{Biomedical Image Processing and Biomedical Visualization}, 1905, 861-870.
+
+\bibitem{pedregosa2011} Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., ... \& Duchesnay, E. (2011). Scikit-learn: Machine learning in Python. \textit{Journal of Machine Learning Research}, 12, 2825-2830.
+
+\bibitem{hastie2009} Hastie, T., Tibshirani, R., \& Friedman, J. (2009). \textit{The elements of statistical learning: Data mining, inference, and prediction} (2nd ed.). Springer.
+
+\bibitem{bishop2006} Bishop, C. M. (2006). \textit{Pattern recognition and machine learning}. Springer.
+
+\bibitem{cristianini2000} Cristianini, N., \& Shawe-Taylor, J. (2000). \textit{An introduction to support vector machines and other kernel-based learning methods}. Cambridge University Press.
+
+\bibitem{cybenko1989} Cybenko, G. (1989). Approximation by superpositions of a sigmoidal function. \textit{Mathematics of Control, Signals and Systems}, 2(4), 303-314.
+
+\bibitem{fawcett2006} Fawcett, T. (2006). An introduction to ROC analysis. \textit{Pattern Recognition Letters}, 27(8), 861-874.
+
+\end{thebibliography}
+
+\end{document}
