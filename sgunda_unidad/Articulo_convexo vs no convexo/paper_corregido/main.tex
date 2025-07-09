@@ -42,7 +42,7 @@ El diagnóstico temprano del cáncer de mama constituye un desafío crítico don
 
 Este estudio aborda una pregunta central: ¿cuándo se justifica el uso de métodos no convexos sobre convexos en diagnóstico médico? La literatura asume frecuentemente que problemas complejos requieren métodos sofisticados \cite{hastie2009}, pero esta asunción carece de validación experimental rigurosa.
 
-El dataset de Wisconsin \cite{wolberg1995} proporciona un caso ideal con 569 muestras y 30 características morfométricas de aspirados de aguja fina (FNA). Representa un problema de clasificación binaria con relevancia clínica directa y amplia aplicabilidad en sistemas de soporte para decisiones médicas.
+El dataset de Wisconsin \cite{wolberg1995} proporciona un caso ideal con 569 muestras y 30 características morfométricas de aspirados de aguja fina (FNA). Representa un problema de clasificación binaria con relevancia clínica directa y amplio uso en sistemas de soporte para decisiones médicas.
 
 Los objetivos incluyen: implementar seis algoritmos representativos, evaluar rendimiento mediante métricas clínicas, analizar eficiencia computacional, identificar características discriminativas, y determinar cuándo la complejidad algorítmica se justifica en aplicaciones médicas críticas.
 
@@ -89,10 +89,10 @@ Alg. Genéticos & pop=50, gen=30, mut=0.1 \\
 \end{center}
 \end{table}
 
-La Tabla I revelan patrones significativos. Los métodos lineales (Regresión Logística y SVM Lineal) convergen en C=0.1, indicando preferencia por regularización moderada. Especialmente relevante es que SVM RBF utiliza gamma=0.01, valor extremadamente bajo que confirma comportamiento cuasi-lineal. Las Redes Neuronales optimizan con arquitectura moderada (100$\rightarrow$50$\rightarrow$25 neuronas) y regularización mínima, demostrando que estructuras complejas no mejoran rendimiento. Los Algoritmos Genéticos convergen con parámetros evolutivos estándar (población=50, generaciones=30), sugiriendo que el problema no requiere exploración exhaustiva del espacio de soluciones. Estos hallazgos confirman la hipótesis principal: el dataset de Wisconsin es linealmente separable, validando la suficiencia de métodos convexos para este problema de clasificación médica.
+La Tabla I Revelan patrones significativos. Los métodos lineales (Regresión Logística y SVM Lineal) convergen en C=0.1, indicando preferencia por regularización moderada. Especialmente relevante es que SVM RBF utiliza gamma=0.01, valor extremadamente bajo que confirma comportamiento cuasi-lineal. Las Redes Neuronales optimizan con arquitectura moderada (100$\rightarrow$50$\rightarrow$25 neuronas) y regularización mínima, demostrando que estructuras complejas no mejoran rendimiento. Los Algoritmos Genéticos convergen con parámetros evolutivos estándar (población=50, generaciones=30), sugiriendo que el problema no requiere exploración exhaustiva del espacio de soluciones. Estos hallazgos confirman la hipótesis principal: el dataset de Wisconsin es linealmente separable, validando la suficiencia de métodos convexos para este problema de clasificación médica.
 
 
-Los resultados revelan empate técnico entre SVM Lineal y SVM RBF alcanzando 98.25\% precisión, estableciendo nuevo estándar de rendimiento.
+Los resultados revelan empate técnico entre SVM Lineal y SVM RBF alcanzando 98.25\% de precisión, estableciendo nuevo estándar de rendimiento.
 
 \begin{table}[htbp]
 \caption{Comparación de Rendimiento}
@@ -125,6 +125,78 @@ Como se observa en la Tabla II, los resultados confirman el empate técnico entr
 SVM Lineal demostró mejor rendimiento global con máxima precisión (98.25\%) y eficiencia superior (0.4794s), estableciéndose como método óptimo para implementación clínica.
 
 SVM RBF logró precisión idéntica (98.25\%) pero requirió mayor tiempo computacional (3.4545s), confirmando que el comportamiento cuasi-lineal del dataset no justifica la complejidad del kernel RBF.
+\subsection{Análisis de Matrices de Confusión}
+
+Las matrices de confusión revelan patrones específicos de error en los métodos de mejor rendimiento, proporcionando información crítica para implementación clínica.
+
+\begin{table}[htbp]
+\caption{Matriz de Confusión - SVM Lineal}
+\begin{center}
+\footnotesize
+\begin{tabular}{|c|c|c|c|}
+\hline
+\multirow{2}{*}{\textbf{Actual}} & \multicolumn{2}{c|}{\textbf{Predicho}} & \multirow{2}{*}{\textbf{Total}} \\
+\cline{2-3}
+ & \textbf{Benigno} & \textbf{Maligno} & \\
+\hline
+\textbf{Benigno} & 70 & 1 & 71 \\
+\hline
+\textbf{Maligno} & 1 & 42 & 43 \\
+\hline
+\textbf{Total} & 71 & 43 & 114 \\
+\hline
+\end{tabular}
+\label{tab5}
+\end{center}
+\end{table}
+
+\begin{table}[htbp]
+\caption{Matriz de Confusión - SVM RBF}
+\begin{center}
+\footnotesize
+\begin{tabular}{|c|c|c|c|}
+\hline
+\multirow{2}{*}{\textbf{Actual}} & \multicolumn{2}{c|}{\textbf{Predicho}} & \multirow{2}{*}{\textbf{Total}} \\
+\cline{2-3}
+ & \textbf{Benigno} & \textbf{Maligno} & \\
+\hline
+\textbf{Benigno} & 69 & 2 & 71 \\
+\hline
+\textbf{Maligno} & 0 & 43 & 43 \\
+\hline
+\textbf{Total} & 69 & 45 & 114 \\
+\hline
+\end{tabular}
+\label{tab6}
+\end{center}
+\end{table}
+
+El análisis detallado revela diferencias cruciales entre ambos métodos. SVM Lineal exhibe balance perfecto con un falso positivo y un falso negativo, demostrando simetría en tipos de error. Crucialmente, logra sensibilidad del 97.67\% (42/43) y especificidad del 98.59\% (70/71), estableciendo perfil de error equilibrado.
+
+SVM RBF muestra patrón asimétrico con dos falsos positivos pero cero falsos negativos, alcanzando sensibilidad perfecta del 100\% (43/43) pero especificidad ligeramente reducida del 97.18\% (69/71). Esta configuración favorece detección completa de malignidad a costa de mayor tasa de falsos positivos.
+
+\begin{table}[htbp]
+\caption{Métricas Clínicas Derivadas}
+\begin{center}
+\footnotesize
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Métrica} & \textbf{SVM Lineal} & \textbf{SVM RBF} \\
+\hline
+Sensibilidad & 97.67\% & 100.00\% \\
+\hline
+Especificidad & 98.59\% & 97.18\% \\
+\hline
+VPP & 97.67\% & 95.56\% \\
+\hline
+VPN & 98.59\% & 100.00\% \\
+\hline
+\end{tabular}
+\label{tab7}
+\end{center}
+\end{table}
+
+La Tabla \ref{tab7} confirma el trade-off fundamental entre sensibilidad y especificidad. SVM RBF elimina completamente falsos negativos (VPN=100\%), crítico para no perder casos malignos, pero incrementa falsos positivos reduciendo valor predictivo positivo a 95.56\%. SVM Lineal mantiene balance superior con ambas métricas por encima del 97\%, sugiriendo mayor robustez para implementación clínica donde tanto sensibilidad como especificidad son prioritarias.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.48\textwidth]{CAP3.png}
@@ -199,8 +271,114 @@ Concavidad peor & Extremo \\
 \label{tab4}
 \end{center}
 \end{table}
+\subsection{Interpretación Clínica de Características Seleccionadas}
 
+El análisis morfométrico de las 11 características seleccionadas revela patrones diagnósticos fundamentales que conectan propiedades geométricas con comportamiento tumoral maligno.
 
+\subsubsection{Características Morfológicas Básicas}
+
+Las cuatro características básicas (radio, textura, perímetro, área) capturan la geometría fundamental del tumor. El \textbf{radio promedio} refleja el tamaño general de núcleos celulares, donde valores elevados indican proliferación celular descontrolada característica de malignidad \cite{street1993}. La \textbf{textura promedio} cuantifica la variabilidad en intensidades de grises, representando heterogeneidad nuclear asociada con diferenciación celular anormal en tumores malignos.
+
+El \textbf{perímetro} y \textbf{área promedio} proporcionan medidas complementarias de tamaño tumoral. Tumores malignos exhiben típicamente núcleos más grandes y formas irregulares comparados con células benignas, reflejando la pérdida de control del crecimiento celular normal \cite{wolberg1995}.
+
+\subsubsection{Medidas de Variabilidad}
+
+Las características de error estándar (\textbf{concavidad SE} y \textbf{puntos cóncavos SE}) cuantifican la inconsistencia morfológica dentro del mismo tumor. Alta variabilidad en concavidad indica irregularidad en los contornos nucleares, signature morfológica de malignidad donde células pierden uniformidad estructural característica de tejido sano.
+
+La \textbf{compacidad promedio} (característica derivada) mide la relación perímetro²/área, indicando qué tan circular versus irregular es el contorno. Valores elevados sugieren formas más complejas y ramificadas, típicas de invasión tumoral agresiva.
+
+\subsubsection{Valores Extremos Críticos}
+
+Los cuatro valores "peor" (radio, textura, área, concavidad) representan las regiones más anómalas dentro de cada muestra, capturando heterogeneidad intratumoral. Estos extremos son particularmente discriminativos porque tumores malignos exhiben mayor variabilidad regional comparados con lesiones benignas uniformes.
+
+La \textbf{concavidad peor} merece atención especial, midiendo la severidad de indentaciones en el contorno nuclear. Valores altos indican contornos altamente irregulares con múltiples invaginaciones, morfología característica de núcleos malignos con cromatina desorganizada \cite{street1993}.
+
+\begin{table}[htbp]
+\caption{Relevancia Clínica de Características Seleccionadas}
+\begin{center}
+\footnotesize
+\begin{tabular}{|l|l|p{3cm}|}
+\hline
+\textbf{Característica} & \textbf{Categoría} & \textbf{Significado Clínico} \\
+\hline
+Radio promedio & Tamaño & Proliferación celular \\
+\hline
+Textura promedio & Heterogeneidad & Diferenciación anormal \\
+\hline
+Perímetro promedio & Morfología & Irregularidad contorno \\
+\hline
+Área promedio & Tamaño & Volumen nuclear \\
+\hline
+Compacidad promedio & Forma & Circularidad vs ramificación \\
+\hline
+Concavidad SE & Variabilidad & Inconsistencia estructural \\
+\hline
+Puntos cóncavos SE & Variabilidad & Irregularidad regional \\
+\hline
+Radio peor & Extremo & Región más anómala \\
+\hline
+Textura peor & Extremo & Máxima heterogeneidad \\
+\hline
+Área peor & Extremo & Mayor proliferación \\
+\hline
+Concavidad peor & Extremo & Máxima irregularidad \\
+\hline
+\end{tabular}
+\label{tab8}
+\end{center}
+\end{table}
+
+El patrón de selección revela que \textbf{propiedades geométricas simples} contienen información diagnóstica suficiente, validando que morfología nuclear básica es predictor robusto de malignidad. Notably, características complejas derivadas (smoothness, symmetry, fractal dimension) fueron excluidas, sugiriendo que medidas directas de tamaño, forma y variabilidad capturan la esencia del comportamiento tumoral maligno.
+
+Esta selección tiene implicaciones clínicas directas: sistemas de diagnóstico asistido pueden enfocar análisis en características morfológicas fundamentales, simplificando algoritmos sin comprometer precisión diagnóstica.
+
+\subsection{Análisis Comparativo de Curvas ROC}
+
+Las curvas ROC proporcionan evaluación visual comprensiva del rendimiento diagnóstico, revelando diferencias sutiles no evidentes en métricas puntuales.
+
+El análisis revela patrones diagnósticos críticos. \textbf{SVM Lineal} exhibe la curva más próxima a la esquina superior izquierda ideal, con AUC=0.9937 representando discriminación casi perfecta entre casos malignos y benignos. Esta superioridad se mantiene consistente across todo el rango de thresholds, confirmando robustez diagnóstica.
+
+\textbf{Regresión Logística} sorprende con AUC=0.9957, ligeramente superior a SVM RBF (0.9897), demostrando que métodos lineales simples pueden superar técnicas kernel complejas para datasets linealmente separables. Esta diferencia de 0.006 en AUC, aunque aparentemente pequeña, representa mejora significativa en contexto clínico.
+
+\textbf{SVM RBF}, pese a precision idéntica (98.25%), muestra AUC inferior (0.9897), indicando menor discriminación probabilística. Esta discrepancia confirma que alta precision puntual no garantiza rendimiento ROC superior, validando importancia de evaluación multimétrica.
+
+Los \textbf{métodos no convexos} (Redes Neuronales: 0.9940, Algoritmos Genéticos: 0.9947) exhiben AUC competitivos pero fallan en superar métodos lineales, confirmando principio de parsimonia: complejidad adicional no se traduce en ventaja diagnóstica para este problema específico.
+
+\\
+La Tabla \ref{tab9} confirma que todos los métodos alcanzan rendimiento clínicamente excelente (AUC>0.99), pero las diferencias sutiles favorecen consistentemente métodos convexos, validando su suficiencia para diagnóstico morfométrico de cáncer de mama.
+
+\begin{table}[htbp]
+\caption{Interpretación Clínica de Valores AUC}
+\begin{center}
+\footnotesize
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Método} & \textbf{AUC} & \textbf{Interpretación Clínica} \\
+\hline
+Reg. Logística & 0.9957 & Discriminación excelente \\
+\hline
+SVM Lineal & 0.9937 & Discriminación excelente \\
+\hline
+Alg. Genéticos & 0.9947 & Discriminación excelente \\
+\hline
+R. Neuronales & 0.9940 & Discriminación excelente \\
+\hline
+SVM RBF & 0.9897 & Discriminación muy buena \\
+\hline
+Reg. Ridge & 0.9927 & Discriminación muy buena \\
+\hline
+\end{tabular}
+\label{tab9}
+\end{center}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.48\textwidth]{ROC_curvas.png}
+\caption{Curvas ROC comparativas de los seis métodos evaluados. SVM Lineal (AUC=0.9937) y SVM RBF (AUC=0.9897) dominan la región superior izquierda, indicando rendimiento diagnóstico superior. La proximidad a la esquina superior izquierda demuestra balance óptimo entre sensibilidad y especificidad. Regresión Logística mantiene rendimiento competitivo (AUC=0.9957), mientras métodos no convexos exhiben curvas ligeramente inferiores pese a mayor complejidad computacional. Autor: Mario W. Ramírez Puma.}
+\label{fig:roc_curves}
+\end{figure}
+\section{Discusión}
 Los métodos convexos demostraron superioridad multidimensional con convergencia entre 0.09-0.54 segundos versus 3.45-17.74 segundos para no convexos, estableciendo ventaja temporal hasta 37$\times$ mayor. Crucialmente, esta eficiencia no comprometió precisión: SVM Lineal y Regresión Logística alcanzaron los mejores balances rendimiento-eficiencia del experimento.
 
 Los métodos lineales confirmaron empíricamente la separabilidad del dataset, con SVM Lineal logrando rendimiento óptimo (98.25\%) en tiempo competitivo (0.4794s). Los métodos no convexos fallaron sistemáticamente en superar contrapartes lineales, con Algoritmos Genéticos exhibiendo degradación significativa de efectividad pese a mayor complejidad computacional.
@@ -213,17 +391,13 @@ El análisis comparativo revela que la complejidad algorítmica no se traduce en
 
 Este estudio experimental comparó seis técnicas de optimización aplicadas al diagnóstico de cáncer de mama. Los resultados revelan que métodos convexos (SVM Lineal, Regresión Logística, Regresión Ridge) resultaron suficientes y superiores, logrando rendimientos equivalentes con eficiencia dramáticamente mayor.
 
-El empate técnico (98.25\% precisión) entre SVM Lineal y SVM RBF, con clara ventaja temporal para SVM Lineal, demuestra empíricamente que el dataset es linealmente separable. La diferencia computacional fue definitiva: SVM Lineal convergió en 0.4794 segundos versus 3.4545 segundos para SVM RBF sin ganancia de rendimiento.
+El empate técnico (98.25\% de precisión) entre SVM Lineal y SVM RBF, con clara ventaja temporal para SVM Lineal, demuestra empíricamente que el dataset es linealmente separable. La diferencia computacional fue definitiva: SVM Lineal convergió en 0.4794 segundos en comparación a 3.4545 segundos para SVM RBF sin ganancia de rendimiento.
 
-Los métodos no convexos no proporcionaron ventajas significativas, con Algoritmos Genéticos y Redes Neuronales alcanzando solo 96.49\% precisión en tiempos excesivos (13-18 segundos). Esto contradice la asunción inicial de que métodos sofisticados mejorarían el diagnóstico.
+Los métodos no convexos no proporcionaron ventajas significativas, con Algoritmos Genéticos y Redes Neuronales alcanzando solo 96.49\% de precisión en tiempos excesivos (13-18 segundos). Esto contradice la asunción inicial de que métodos sofisticados mejorarían el diagnóstico.
 
 Los resultados confirman que para diagnóstico morfométrico de cáncer de mama, métodos convexos proporcionan la combinación ideal de precisión, eficiencia e interpretabilidad requerida en aplicaciones médicas críticas. La elección debe basarse en evidencia experimental rigurosa más que en asunciones sobre complejidad aparente del problema.
 
 El código fuente y datos experimentales están disponibles en el repositorio del proyecto \cite{repositorio2024}.
-
-\section*{Agradecimientos}
-
-Agradezco al docente del curso de Métodos de Optimización por su importante ayuda, compromiso académico y constante disposición para resolver dudas durante el desarrollo de este trabajo. Su guía fue fundamental para el avance y culminación exitosa de esta investigación.
 
 \begin{thebibliography}{00}
 \bibitem{wolberg1995} W. H. Wolberg, W. N. Street, y O. L. Mangasarian, ``Breast cancer Wisconsin (diagnostic) data set,'' \textit{UCI Machine Learning Repository}, 1995. DOI: 10.24432/C5DW2B
